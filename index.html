@@ -4,12 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>我的博客</title>
+  <!-- 样式 -->
   <style>
     body {
       font-family: "Segoe UI", Arial, sans-serif;
       margin: 0;
       padding: 0;
-      background: #f9f9f9;
+      background: #f4f6f8;
       color: #333;
     }
     header {
@@ -35,7 +36,7 @@
       color: #fff;
     }
     main {
-      max-width: 800px;
+      max-width: 900px;
       margin: 2rem auto;
       padding: 0 1rem;
     }
@@ -43,26 +44,52 @@
       background: #fff;
       border-radius: 8px;
       padding: 1.5rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
       box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      transition: transform 0.2s;
-    }
-    .post:hover {
-      transform: translateY(-3px);
     }
     .post h2 {
       margin-top: 0;
       color: #0366d6;
       font-size: 1.4rem;
     }
-    .post p {
-      line-height: 1.6;
-      font-size: 1rem;
-    }
     .date {
       font-size: 0.8rem;
       color: #666;
-      margin-bottom: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .toc {
+      background: #f9f9f9;
+      padding: 0.8rem 1rem;
+      border-left: 4px solid #0366d6;
+      margin-bottom: 1.2rem;
+      font-size: 0.9rem;
+    }
+    .toc strong {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .toc ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .toc li {
+      margin: 0.3rem 0;
+    }
+    .toc a {
+      text-decoration: none;
+      color: #0366d6;
+    }
+    .toc a:hover {
+      text-decoration: underline;
+    }
+    .content h1, .content h2, .content h3 {
+      margin-top: 1.2rem;
+    }
+    .content pre {
+      background: #f6f8fa;
+      padding: 0.8rem;
+      border-radius: 6px;
+      overflow-x: auto;
     }
     footer {
       text-align: center;
@@ -71,6 +98,13 @@
       font-size: 0.9rem;
     }
   </style>
+  <!-- Markdown 渲染 -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Prism.js 代码高亮 -->
+  <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-javascript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-python.min.js"></script>
 </head>
 <body>
   <header>
@@ -99,13 +133,34 @@
       issues.forEach(issue => {
         let div = document.createElement("div");
         div.className = "post";
+
+        // 渲染 Markdown
+        const htmlContent = marked.parse(issue.body || "");
+
+        // 构建 TOC
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = htmlContent;
+        const headings = tempDiv.querySelectorAll("h1, h2, h3");
+        let tocHtml = "<div class='toc'><strong>目录</strong><ul>";
+        headings.forEach((h, i) => {
+          const id = "heading-" + i;
+          h.id = id;
+          tocHtml += `<li><a href="#${id}">${h.innerText}</a></li>`;
+        });
+        tocHtml += "</ul></div>";
+
         div.innerHTML = `
           <h2>${issue.title}</h2>
           <div class="date">发表于 ${new Date(issue.created_at).toLocaleDateString()}</div>
-          <p>${issue.body ? issue.body.replace(/\n/g, "<br>") : ""}</p>
+          ${headings.length > 0 ? tocHtml : ""}
+          <div class="content">${tempDiv.innerHTML}</div>
         `;
+
         container.appendChild(div);
       });
+
+      // 渲染代码高亮
+      Prism.highlightAll();
     }
     loadIssues();
   </script>
