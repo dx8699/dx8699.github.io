@@ -4,107 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>我的博客</title>
-  <!-- 样式 -->
   <style>
-    body {
-      font-family: "Segoe UI", Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f4f6f8;
-      color: #333;
-    }
-    header {
-      background: #24292f;
-      color: #fff;
-      padding: 1rem 2rem;
-      text-align: center;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 1.8rem;
-    }
-    nav {
-      margin-top: 0.5rem;
-    }
-    nav a {
-      color: #ccc;
-      text-decoration: none;
-      margin: 0 10px;
-      font-size: 0.9rem;
-    }
-    nav a:hover {
-      color: #fff;
-    }
-    main {
-      max-width: 900px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-    .post {
-      background: #fff;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    }
-    .post h2 {
-      margin-top: 0;
-      color: #0366d6;
-      font-size: 1.4rem;
-    }
-    .date {
-      font-size: 0.8rem;
-      color: #666;
-      margin-bottom: 1rem;
-    }
-    .toc {
-      background: #f9f9f9;
-      padding: 0.8rem 1rem;
-      border-left: 4px solid #0366d6;
-      margin-bottom: 1.2rem;
-      font-size: 0.9rem;
-    }
-    .toc strong {
-      display: block;
-      margin-bottom: 0.5rem;
-    }
-    .toc ul {
-      list-style: none;
-      padding-left: 0;
-    }
-    .toc li {
-      margin: 0.3rem 0;
-    }
-    .toc a {
-      text-decoration: none;
-      color: #0366d6;
-    }
-    .toc a:hover {
-      text-decoration: underline;
-    }
-    .content h1, .content h2, .content h3 {
-      margin-top: 1.2rem;
-    }
-    .content pre {
-      background: #f6f8fa;
-      padding: 0.8rem;
-      border-radius: 6px;
-      overflow-x: auto;
-    }
-    footer {
-      text-align: center;
-      padding: 1rem;
-      color: #999;
-      font-size: 0.9rem;
-    }
+    body { font-family: "Segoe UI", Arial, sans-serif; background:#f4f6f8; margin:0; padding:0; }
+    header { background:#24292f; color:#fff; padding:1rem; text-align:center; }
+    header h1 { margin:0; font-size:1.8rem; }
+    nav { margin-top:0.5rem; }
+    nav a { color:#ccc; margin:0 10px; text-decoration:none; }
+    nav a:hover { color:#fff; }
+    main { max-width:800px; margin:2rem auto; padding:0 1rem; }
+    .post-card { background:#fff; padding:1.2rem; margin-bottom:1.5rem;
+                 border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
+    .post-card h2 { margin:0 0 0.5rem; font-size:1.3rem; }
+    .post-card h2 a { color:#0366d6; text-decoration:none; }
+    .post-card h2 a:hover { text-decoration:underline; }
+    .date { font-size:0.85rem; color:#666; margin-bottom:0.5rem; }
+    .excerpt { color:#444; font-size:0.95rem; line-height:1.5; }
+    footer { text-align:center; padding:1rem; color:#999; font-size:0.9rem; }
   </style>
-  <!-- Markdown 渲染 -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <!-- Prism.js 代码高亮 -->
-  <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.min.css" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-javascript.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-python.min.js"></script>
 </head>
 <body>
   <header>
@@ -114,53 +30,27 @@
       <a href="https://github.com/dx8699/dx8699.github.io/issues">写文章 (Issues)</a>
     </nav>
   </header>
-
-  <main id="issues">
-    <p>加载中...</p>
-  </main>
-
-  <footer>
-    © 2025 我的博客 | Powered by GitHub Pages + Issues
-  </footer>
+  <main id="posts">加载中...</main>
+  <footer>© 2025 我的博客 | Powered by GitHub Pages + Issues</footer>
 
   <script>
     async function loadIssues() {
       const response = await fetch("https://api.github.com/repos/dx8699/dx8699.github.io/issues");
       const issues = await response.json();
-      const container = document.getElementById("issues");
+      const container = document.getElementById("posts");
       container.innerHTML = "";
 
       issues.forEach(issue => {
-        let div = document.createElement("div");
-        div.className = "post";
-
-        // 渲染 Markdown
-        const htmlContent = marked.parse(issue.body || "");
-
-        // 构建 TOC
-        const tempDiv = document.createElement("div");
-        tempDiv.innerHTML = htmlContent;
-        const headings = tempDiv.querySelectorAll("h1, h2, h3");
-        let tocHtml = "<div class='toc'><strong>目录</strong><ul>";
-        headings.forEach((h, i) => {
-          const id = "heading-" + i;
-          h.id = id;
-          tocHtml += `<li><a href="#${id}">${h.innerText}</a></li>`;
-        });
-        tocHtml += "</ul></div>";
-
+        const excerpt = issue.body ? issue.body.replace(/\n/g," ").slice(0,150) + "..." : "";
+        const div = document.createElement("div");
+        div.className = "post-card";
         div.innerHTML = `
-          <h2>${issue.title}</h2>
+          <h2><a href="post.html?id=${issue.number}">${issue.title}</a></h2>
           <div class="date">发表于 ${new Date(issue.created_at).toLocaleDateString()}</div>
-          ${headings.length > 0 ? tocHtml : ""}
-          <div class="content">${tempDiv.innerHTML}</div>
+          <div class="excerpt">${excerpt}</div>
         `;
-
         container.appendChild(div);
       });
-
-      // 渲染代码高亮
-      Prism.highlightAll();
     }
     loadIssues();
   </script>
